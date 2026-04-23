@@ -118,26 +118,30 @@ void uf2_board_app_jump()
 uint8_t uf2_run_app()
 {
     uint8_t ret = 1;
+
+    // ไม่รัน app หาก GPIO is Low
     if(GPIO_ReadInputDataBit(BOOT_GPIO_Port, BOOT_GPIO_Pin) == 0)
     {
         ret = 0;
     }
-    else if(*(uint32_t*)BOARD_FLASH_APP_START  != 0xe339e339 )
+
+    // ไม่รัน app หาก flash empty
+    if(*(uint32_t*)BOARD_FLASH_APP_START  == 0xe339e339 )
     {
-        if(*(uint32_t*)CalAddr == MAGIC_APP)
-        {
-            ret = 1;
-        }
+        ret = 0;
     }
-    else
+    
+    // หาก flag ไม่ใช่ app mode
+    if(*(uint32_t*)CalAddr != MAGIC_APP)
     {
         ret = 0;
     }
 
+    // ถ้าเข้า bootloader จากการ write flash, หาก reset ทันทีจะกลับไปรัน app mode
     if(*(uint32_t*)CalAddr == MAGIC_IAP)
     {
         FLASH_Unlock_Fast();
-        FLASH_ProgramWord(CalAddr, MAGIC_IAP);
+        FLASH_ProgramWord(CalAddr, MAGIC_APP);
         FLASH->CTLR |= ((uint32_t)0x00008000);
         FLASH->CTLR |= ((uint32_t)0x00000080);
     }
