@@ -34,7 +34,7 @@ You can jump from your application to the bootloader using one of the following 
 Pull **GPIO C7** LOW during reset or runtime.
 
 ### 2. Magic Value Trigger
-Write a magic value to a reserved flash address:
+Write a magic value to a reserved flash address and soft reset mcu.
 ```
 Address: 0x08078000-4
 Value: 0x0000FFFF (MAGIC_IAP)
