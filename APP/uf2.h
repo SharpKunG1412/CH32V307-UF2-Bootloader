@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define UF2_VERSION         "0.0.3"
+#define UF2_VERSION         "0.0.4"
 #define UF2_PRODUCT_NAME    "CH32V UF2"
 #define UF2_VOLUME_LABEL    "SHARP BOOT"
 #define UF2_BOARD_ID        "CH32V307"

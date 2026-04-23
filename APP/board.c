@@ -47,24 +47,34 @@ void uf2_board_flash_write(uint32_t addr, uint8_t *src, uint32_t len)
         return;
     }
 
-    uint32_t const page_addr = addr & ~(SECTOR_SIZE - 1);
-
-    if (page_addr != _flash_page_addr)
+    while (len > 0)
     {
-        /* Write out anything in cache before overwriting it. */
-        uf2_board_flash_flush();
+        uint32_t page_addr = addr & ~(SECTOR_SIZE - 1);
+        uint32_t offset    = addr &  (SECTOR_SIZE - 1);
+        uint32_t remain    = SECTOR_SIZE - offset;
+        uint32_t write_len = (len < remain) ? len : remain;
 
-        _flash_page_addr = page_addr;
+        /* Switch sector */
+        if (page_addr != _flash_page_addr)
+        {
+            uf2_board_flash_flush();
 
-        /* Copy the current contents of the entire page into the cache. */
-        memcpy(_flash_cache, (void *) page_addr, SECTOR_SIZE);
+            _flash_page_addr = page_addr;
+
+            /* Load entire sector into cache */
+            memcpy(_flash_cache, (void *)page_addr, SECTOR_SIZE);
+
+            printf("uf2_flash Addr 0x%08x\r\n", page_addr);
+        }
+
+        /* Write into cache */
+        memcpy(_flash_cache + offset, src, write_len);
+
+        /* Advance */
+        addr += write_len;
+        src  += write_len;
+        len  -= write_len;
     }
-
-    printf("uf2_flash Addr 0x%08x\r\n", addr);
-
-    /* Overwrite part or all of the page cache with the src data. */
-    memcpy(_flash_cache + (addr & (SECTOR_SIZE - 1)), src, len);
-
 }
 
 void uf2_board_flash_flush()
